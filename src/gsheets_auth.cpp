@@ -1,8 +1,10 @@
 #include <fstream>
+#include <iostream>
 #include <cstdlib>
 #include <json.hpp>
 
 #include "duckdb/common/exception/binder_exception.hpp"
+#include "duckdb/main/client_context.hpp"
 
 #include "gsheets_auth.hpp"
 #include "gsheets_utils.hpp"
@@ -18,7 +20,7 @@ static void CopySecret(const std::string &key, const CreateSecretInput &input, K
 	auto val = input.options.find(key);
 
 	if (val != input.options.end()) {
-		result.secret_map[key] = val->second;
+		result.secret_map[Identifier(key)] = val->second;
 	}
 }
 
@@ -110,7 +112,7 @@ void CreateGsheetSecretFunctions::Register(ExtensionLoader &loader) {
 
 	// Register the new type
 	SecretType secret_type;
-	secret_type.name = type;
+	secret_type.name = Identifier(type);
 	secret_type.deserializer = KeyValueSecret::Deserialize<KeyValueSecret>;
 	secret_type.default_provider = "oauth";
 
